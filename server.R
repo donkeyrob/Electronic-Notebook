@@ -5,20 +5,36 @@ source("data.R")
 server <- function(input, output,session){
   
   getdata <- reactive({
-    newdata <- data %>% filter(term == input$term)
+    newdata <- data %>% filter(Term == input$term)
   })
   
   makeplot <- reactive({
     newdata <- getdata()
     ggplot(newdata,aes(eval(as.name(input$question))))+
-     geom_bar(aes(y = (..count..)/sum(..count..),fill = type), position = "dodge")+
+     geom_bar(aes(y = (..count..)/sum(..count..),fill = Type), position = "dodge")+
      scale_y_continuous(labels = scales::percent, name = "Proportion")+
+     ggtitle(wrapper(questions[input$question], 66))+
+     xlab("Answers")+
      theme(axis.text.x = element_text(angle = 45, hjust = 1))
   })
 
   
   output$survey_question <- renderPlot({
     makeplot()
+  })
+  
+  getdf <- reactive({
+    newdf <- df
+  })
+  
+  makeplot2 <- reactive({
+    newdf <- getdf()
+    ggplot(data = newdf,aes(x = class, y = grade, fill = term))+
+      geom_boxplot()+
+      ggtitle("Comparison of grades")
+  })
+  output$grade <- renderPlot({
+    makeplot2()
   })
 
   # output$intro <- renderText({
